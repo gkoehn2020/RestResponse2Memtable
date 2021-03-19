@@ -1,5 +1,7 @@
 unit frmUIMain;
 
+//Inspiration from Holger Flick at https://flixengineering.com/archives/229
+
 interface
 
 uses
