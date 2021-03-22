@@ -11,11 +11,11 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, FireDAC.Stan.Intf,
   FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS,
   FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Comp.DataSet,
-  FireDAC.Comp.Client, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Grids, Vcl.DBGrids;
+  FireDAC.Comp.Client, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Grids, Vcl.DBGrids,
+  REST.Types, Data.Bind.Components, Data.Bind.ObjectScope;
 
 type
   TForm1 = class(TForm)
-    btnCreateComponents: TButton;
     DBGrid1: TDBGrid;
     btnMakeRestRequest: TButton;
     LabeledEdit1: TLabeledEdit;
@@ -26,17 +26,11 @@ type
     FDMemTable2ShowStatus: TStringField;
     FDMemTable2ShowPremiered: TStringField;
     FDMemTable2NewStatus: TStringField;
-    procedure btnCreateComponentsClick(Sender: TObject);
+    RESTClient: TRESTClient;
+    RESTRequest: TRESTRequest;
+    RESTResponse: TRESTResponse;
+    RESTResponseDataSetAdapter: TRESTResponseDataSetAdapter;
     procedure btnMakeRestRequestClick(Sender: TObject);
-  private
-    { Private declarations }
-    FRESTClient: TRESTClient;
-    FRESTRequest: TRESTRequest;
-    FRESTResponse: TRESTResponse;
-    FRESTResponseDataSetAdapter: TRESTResponseDataSetAdapter;
-    FCalcField: TStringField;
-  public
-    { Public declarations }
   end;
 
 var
@@ -50,34 +44,11 @@ uses
   System.StrUtils
   ;
 
-procedure TForm1.btnCreateComponentsClick(Sender: TObject);
-begin
-  FRESTClient := TRESTClient.Create(Form1);
-  FRESTClient.Accept := 'application/json, text/plani; q=0.9, text/html;q=0.8';
-  FRESTClient.AcceptCharset := 'UTF-8,*;q=0.8';
-  FRESTClient.BaseURL := 'http://api.tvmaze.com';
-
-  FRESTRequest := TRESTRequest.Create(Form1);
-  FRESTRequest.Client := FRESTClient;
-  FRESTRequest.Params.AddUrlSegment('title', LabeledEdit1.Text);
-  FRESTRequest.Resource := 'search';
-  FRESTRequest.ResourceSuffix := 'shows?q={title}';
-
-  FRESTResponse := TRESTResponse.Create(Form1);
-  FRESTResponse.ContentType := 'application/json';
-  FRESTRequest.Response := FRESTResponse;
-
-  FRESTResponseDataSetAdapter := TRESTResponseDataSetAdapter.Create(Form1);
-  FRESTResponseDataSetAdapter.Response := FRESTResponse;
-  FRESTResponseDataSetAdapter.NestedElements := True;
-  FRESTResponseDataSetAdapter.Dataset := FDMemTable1;
-
-  btnCreateComponents.Enabled := false;
-end;
-
 procedure TForm1.btnMakeRestRequestClick(Sender: TObject);
 begin
-  FRESTRequest.Execute;
+  RESTRequest.ResourceSuffix := IfThen(Length(LabeledEdit1.Text) > 0,
+                                       'shows?q=' + Trim(LabeledEdit1.Text), '');
+  RESTRequest.Execute;
 
   // fill table that is connected to grid
   FDMemTable2.Open;
