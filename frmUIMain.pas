@@ -21,10 +21,13 @@ type
     LabeledEdit1: TLabeledEdit;
     DataSource1: TDataSource;
     FDMemTable1: TFDMemTable;
+    FDMemTable2: TFDMemTable;
+    FDMemTable2ShowName: TStringField;
+    FDMemTable2ShowStatus: TStringField;
+    FDMemTable2ShowPremiered: TStringField;
+    FDMemTable2NewStatus: TStringField;
     procedure btnCreateComponentsClick(Sender: TObject);
     procedure btnMakeRestRequestClick(Sender: TObject);
-    procedure FDMemTable1BeforeGetRecords(DataSet: TFDDataSet);
-    procedure FDMemTable1CalcFields(DataSet: TDataSet);
   private
     { Private declarations }
     FRESTClient: TRESTClient;
@@ -49,7 +52,7 @@ uses
 
 procedure TForm1.btnCreateComponentsClick(Sender: TObject);
 begin
-  FRESTClient := TRESTClient.Create('http://api.tvmaze.com');
+  FRESTClient := TRESTClient.Create(Form1);
   FRESTClient.Accept := 'application/json, text/plani; q=0.9, text/html;q=0.8';
   FRESTClient.AcceptCharset := 'UTF-8,*;q=0.8';
   FRESTClient.BaseURL := 'http://api.tvmaze.com';
@@ -75,56 +78,21 @@ end;
 procedure TForm1.btnMakeRestRequestClick(Sender: TObject);
 begin
   FRESTRequest.Execute;
-  DataSource1.DataSet := FDMemTable1;
-end;
 
-procedure ModifyFieldVisibility(aDataset: TFDDataSet);
-var
-  lField: TField;
-  I: Integer;
-  lFieldToAnalyze: TField;
-  lFieldDef: TFieldDef;
-  lTFieldAttributes: TFieldAttributes;
-begin
-  //Set visibility of all fields to False.
-  for I := 0 to aDataset.Fields.Count-1 do
-    aDataset.Fields[I].Visible := False;
+  // fill table that is connected to grid
+  FDMemTable2.Open;
+  FDMemTable2.EmptyDataSet;
+  FDMemTable1.First;
+  while not FDMemTable1.Eof do begin
+    FDMemTable2.Insert;
+    FDMemTable2ShowName.AsString := FDMemTable1.FieldByName('show.name').AsString;
+    FDMemTable2ShowStatus.AsString := FDMemTable1.FieldByName('show.status').AsString;
+    FDMemTable2ShowPremiered.AsString := FDMemTable1.FieldByName('show.premiered').AsString;
+    FDMemTable2NewStatus.AsString := IfThen(FDMemTable1.FieldByName('show.status').AsString = 'Running', '!!!', '???');
+    FDMemTable2.Post;
 
-  //Show fields I am interested in
-  aDataset.FieldByName('show.name').Visible := True;
-  aDataset.FieldByName('show.name').DisplayWidth := 15;
-  aDataset.FieldByName('show.status').Visible := True;
-  aDataset.FieldByName('show.status').DisplayWidth := 15;
-  aDataset.FieldByName('show.premiered').Visible := True;
-  aDataset.FieldByName('show.premiered').DisplayWidth := 15;
-end;
-
-procedure TForm1.FDMemTable1BeforeGetRecords(DataSet: TFDDataSet);
-begin
-  //Showmessage(IfThen(DataSet.Active, 'Active', 'Not Active'));
-
-  ModifyFieldVisibility(DataSet);
-
-  if not assigned(FCalcField) then
-    begin
-      FCalcField := TStringField.Create(DataSet);
-      FCalcField.FieldName := 'NewStatus';
-      FCalcField.DataSet := DataSet;
-      FCalcField.FieldKind := fkCalculated;
-      FCalcField.Calculated := True;
-      FCalcField.Size := 15;
-      DataSet.CreateDataSet();
-    end;
-  //DataSet.Active := False;
-  //Showmessage(IfThen(DataSet.Active, 'Active', 'Not Active'));
-end;
-
-procedure TForm1.FDMemTable1CalcFields(DataSet: TDataSet);
-var
-  lNewValue: string;
-begin
-  lNewValue := IfThen(DataSet.FieldByName('show.status').AsString = 'Running', '!!!', '???');
-  DataSet.FieldByName('NewStatus').AsString := lNewValue;
+    FDMemTable1.Next;
+  end;
 end;
 
 end.

@@ -60,12 +60,11 @@ object Form1: TForm1
     Text = 'Trek'
   end
   object DataSource1: TDataSource
-    Left = 152
-    Top = 280
+    DataSet = FDMemTable2
+    Left = 272
+    Top = 256
   end
   object FDMemTable1: TFDMemTable
-    OnCalcFields = FDMemTable1CalcFields
-    BeforeGetRecords = FDMemTable1BeforeGetRecords
     FetchOptions.AssignedValues = [evMode]
     FetchOptions.Mode = fmAll
     ResourceOptions.AssignedValues = [rvSilentMode]
@@ -75,5 +74,32 @@ object Form1: TForm1
     UpdateOptions.AutoCommitUpdates = True
     Left = 144
     Top = 224
+  end
+  object FDMemTable2: TFDMemTable
+    FetchOptions.AssignedValues = [evMode]
+    FetchOptions.Mode = fmAll
+    ResourceOptions.AssignedValues = [rvSilentMode]
+    ResourceOptions.SilentMode = True
+    UpdateOptions.AssignedValues = [uvCheckRequired, uvAutoCommitUpdates]
+    UpdateOptions.CheckRequired = False
+    UpdateOptions.AutoCommitUpdates = True
+    Left = 280
+    Top = 192
+    object FDMemTable2ShowName: TStringField
+      FieldName = 'ShowName'
+      Size = 15
+    end
+    object FDMemTable2ShowStatus: TStringField
+      FieldName = 'ShowStatus'
+      Size = 15
+    end
+    object FDMemTable2ShowPremiered: TStringField
+      FieldName = 'ShowPremiered'
+      Size = 15
+    end
+    object FDMemTable2NewStatus: TStringField
+      FieldName = 'NewStatus'
+      Size = 15
+    end
   end
 end
