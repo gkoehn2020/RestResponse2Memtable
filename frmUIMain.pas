@@ -23,15 +23,15 @@ type
     FDMemTable1: TFDMemTable;
     procedure btnCreateComponentsClick(Sender: TObject);
     procedure btnMakeRestRequestClick(Sender: TObject);
-    procedure FDMemTable1BeforeGetRecords(DataSet: TFDDataSet);
-    procedure FDMemTable1CalcFields(DataSet: TDataSet);
+    procedure FormDestroy(Sender: TObject);
   private
     { Private declarations }
     FRESTClient: TRESTClient;
     FRESTRequest: TRESTRequest;
     FRESTResponse: TRESTResponse;
     FRESTResponseDataSetAdapter: TRESTResponseDataSetAdapter;
-    FCalcField: TStringField;
+    procedure OnCalcFields(aDataSet: TDataSet);
+    procedure CreateDataFieldsOnDataSet;
   public
     { Public declarations }
   end;
@@ -45,7 +45,72 @@ implementation
 
 uses
   System.StrUtils
+, System.TypInfo
   ;
+
+procedure TForm1.OnCalcFields(aDataSet: TDataSet);
+var
+  lNewValue: string;
+begin
+  lNewValue := IfThen(aDataSet.FieldByName('show.status').AsString = 'Running', '!!!', '???');
+  aDataSet.FieldByName('NewStatus').AsString := lNewValue;
+end;
+
+procedure TForm1.CreateDataFieldsOnDataSet;
+var
+  lFieldList: TStringList;
+  lFielddef: TFieldDef;
+  lNewField: TField;
+begin
+  lFieldList := TStringList.Create;
+  try
+    lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
+    lFieldDef.Name := 'show';
+    lFieldDef.DataType := ftWideString;
+    lNewField := lFieldDef.CreateField(FDMemTable1);
+    lNewField.FieldKind := fkData;
+    lNewField.Size := 15;
+    lNewField.Visible := False;
+
+    lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
+    lFieldDef.Name := 'show.id';
+    lFieldDef.DataType := ftWideString;
+    lNewField := lFieldDef.CreateField(FDMemTable1);
+    lNewField.FieldKind := fkData;
+    lNewField.Size := 15;
+
+    lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
+    lFieldDef.Name := 'show.name';
+    lFieldDef.DataType := ftWideString;
+    lNewField := lFieldDef.CreateField(FDMemTable1);
+    lNewField.FieldKind := fkData;
+    lNewField.Size := 25;
+
+    lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
+    lFieldDef.Name := 'show.status';
+    lFieldDef.DataType := ftWideString;
+    lNewField := lFieldDef.CreateField(FDMemTable1);
+    lNewField.FieldKind := fkData;
+    lNewField.Size := 15;
+
+    lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
+    lFieldDef.Name := 'show.premiered';
+    lFieldDef.DataType := ftWideString;
+    lNewField := lFieldDef.CreateField(FDMemTable1);
+    lNewField.FieldKind := fkData;
+    lNewField.Size := 15;
+
+    lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
+    lFieldDef.Name := 'NewStatus';
+    lFieldDef.DataType := ftWideString;
+    lNewField := lFieldDef.CreateField(FDMemTable1);
+    lNewField.FieldKind := fkCalculated;
+    lNewField.Calculated := True;
+    lNewField.Size := 15;
+  finally
+    lFieldList.Free;
+  end;
+end;
 
 procedure TForm1.btnCreateComponentsClick(Sender: TObject);
 begin
@@ -64,6 +129,9 @@ begin
   FRESTResponse.ContentType := 'application/json';
   FRESTRequest.Response := FRESTResponse;
 
+  CreateDataFieldsOnDataSet;
+  FDMemTable1.OnCalcFields := OnCalcFields;
+
   FRESTResponseDataSetAdapter := TRESTResponseDataSetAdapter.Create(Form1);
   FRESTResponseDataSetAdapter.Response := FRESTResponse;
   FRESTResponseDataSetAdapter.NestedElements := True;
@@ -74,57 +142,14 @@ end;
 
 procedure TForm1.btnMakeRestRequestClick(Sender: TObject);
 begin
+  FRESTRequest.Params.ParameterByName('title').Value := LabeledEdit1.Text;
   FRESTRequest.Execute;
   DataSource1.DataSet := FDMemTable1;
 end;
 
-procedure ModifyFieldVisibility(aDataset: TFDDataSet);
-var
-  lField: TField;
-  I: Integer;
-  lFieldToAnalyze: TField;
-  lFieldDef: TFieldDef;
-  lTFieldAttributes: TFieldAttributes;
+procedure TForm1.FormDestroy(Sender: TObject);
 begin
-  //Set visibility of all fields to False.
-  for I := 0 to aDataset.Fields.Count-1 do
-    aDataset.Fields[I].Visible := False;
-
-  //Show fields I am interested in
-  aDataset.FieldByName('show.name').Visible := True;
-  aDataset.FieldByName('show.name').DisplayWidth := 15;
-  aDataset.FieldByName('show.status').Visible := True;
-  aDataset.FieldByName('show.status').DisplayWidth := 15;
-  aDataset.FieldByName('show.premiered').Visible := True;
-  aDataset.FieldByName('show.premiered').DisplayWidth := 15;
-end;
-
-procedure TForm1.FDMemTable1BeforeGetRecords(DataSet: TFDDataSet);
-begin
-  //Showmessage(IfThen(DataSet.Active, 'Active', 'Not Active'));
-
-  ModifyFieldVisibility(DataSet);
-
-  if not assigned(FCalcField) then
-    begin
-      FCalcField := TStringField.Create(DataSet);
-      FCalcField.FieldName := 'NewStatus';
-      FCalcField.DataSet := DataSet;
-      FCalcField.FieldKind := fkCalculated;
-      FCalcField.Calculated := True;
-      FCalcField.Size := 15;
-      DataSet.CreateDataSet();
-    end;
-  //DataSet.Active := False;
-  //Showmessage(IfThen(DataSet.Active, 'Active', 'Not Active'));
-end;
-
-procedure TForm1.FDMemTable1CalcFields(DataSet: TDataSet);
-var
-  lNewValue: string;
-begin
-  lNewValue := IfThen(DataSet.FieldByName('show.status').AsString = 'Running', '!!!', '???');
-  DataSet.FieldByName('NewStatus').AsString := lNewValue;
+  FRESTClient.Free;
 end;
 
 end.

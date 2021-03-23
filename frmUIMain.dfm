@@ -2,8 +2,8 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 399
-  ClientWidth = 789
+  ClientHeight = 347
+  ClientWidth = 677
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -11,9 +11,11 @@ object Form1: TForm1
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  Position = poScreenCenter
+  OnDestroy = FormDestroy
   DesignSize = (
-    789
-    399)
+    677
+    347)
   PixelsPerInch = 96
   TextHeight = 13
   object btnCreateComponents: TButton
@@ -28,8 +30,8 @@ object Form1: TForm1
   object DBGrid1: TDBGrid
     Left = 8
     Top = 64
-    Width = 773
-    Height = 327
+    Width = 661
+    Height = 275
     Anchors = [akLeft, akTop, akRight, akBottom]
     DataSource = DataSource1
     TabOrder = 1
@@ -64,8 +66,13 @@ object Form1: TForm1
     Top = 280
   end
   object FDMemTable1: TFDMemTable
-    OnCalcFields = FDMemTable1CalcFields
-    BeforeGetRecords = FDMemTable1BeforeGetRecords
+    FieldDefs = <
+      item
+        Name = 'GKStatus'
+        DataType = ftString
+        Size = 20
+      end>
+    IndexDefs = <>
     FetchOptions.AssignedValues = [evMode]
     FetchOptions.Mode = fmAll
     ResourceOptions.AssignedValues = [rvSilentMode]
@@ -73,7 +80,8 @@ object Form1: TForm1
     UpdateOptions.AssignedValues = [uvCheckRequired, uvAutoCommitUpdates]
     UpdateOptions.CheckRequired = False
     UpdateOptions.AutoCommitUpdates = True
-    Left = 144
-    Top = 224
+    StoreDefs = True
+    Left = 152
+    Top = 200
   end
 end
