@@ -21,16 +21,18 @@ type
     LabeledEdit1: TLabeledEdit;
     DataSource1: TDataSource;
     FDMemTable1: TFDMemTable;
+    rdgCreateColumnOrder: TRadioGroup;
     procedure btnCreateComponentsClick(Sender: TObject);
     procedure btnMakeRestRequestClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FDMemTable1BeforeGetRecords(DataSet: TFDDataSet);
+    procedure FDMemTable1CalcFields(DataSet: TDataSet);
   private
     { Private declarations }
     FRESTClient: TRESTClient;
     FRESTRequest: TRESTRequest;
     FRESTResponse: TRESTResponse;
     FRESTResponseDataSetAdapter: TRESTResponseDataSetAdapter;
-    procedure OnCalcFields(aDataSet: TDataSet);
     procedure CreateDataFieldsOnDataSet;
   public
     { Public declarations }
@@ -48,14 +50,6 @@ uses
 , System.TypInfo
   ;
 
-procedure TForm1.OnCalcFields(aDataSet: TDataSet);
-var
-  lNewValue: string;
-begin
-  lNewValue := IfThen(aDataSet.FieldByName('show.status').AsString = 'Running', '!!!', '???');
-  aDataSet.FieldByName('NewStatus').AsString := lNewValue;
-end;
-
 procedure TForm1.CreateDataFieldsOnDataSet;
 var
   lFieldList: TStringList;
@@ -70,7 +64,6 @@ begin
     lNewField := lFieldDef.CreateField(FDMemTable1);
     lNewField.FieldKind := fkData;
     lNewField.Size := 15;
-    lNewField.Visible := False;
 
     lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
     lFieldDef.Name := 'show.id';
@@ -100,13 +93,16 @@ begin
     lNewField.FieldKind := fkData;
     lNewField.Size := 15;
 
-    lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
-    lFieldDef.Name := 'NewStatus';
-    lFieldDef.DataType := ftWideString;
-    lNewField := lFieldDef.CreateField(FDMemTable1);
-    lNewField.FieldKind := fkCalculated;
-    lNewField.Calculated := True;
-    lNewField.Size := 15;
+    if rdgCreateColumnOrder.ItemIndex = 0 then
+      begin
+        lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
+        lFieldDef.Name := 'NewStatus';
+        lFieldDef.DataType := ftWideString;
+        lNewField := lFieldDef.CreateField(FDMemTable1);
+        lNewField.FieldKind := fkCalculated;
+        lNewField.Calculated := True;
+        lNewField.Size := 15;
+      end;
   finally
     lFieldList.Free;
   end;
@@ -130,7 +126,6 @@ begin
   FRESTRequest.Response := FRESTResponse;
 
   CreateDataFieldsOnDataSet;
-  FDMemTable1.OnCalcFields := OnCalcFields;
 
   FRESTResponseDataSetAdapter := TRESTResponseDataSetAdapter.Create(Form1);
   FRESTResponseDataSetAdapter.Response := FRESTResponse;
@@ -145,6 +140,35 @@ begin
   FRESTRequest.Params.ParameterByName('title').Value := LabeledEdit1.Text;
   FRESTRequest.Execute;
   DataSource1.DataSet := FDMemTable1;
+end;
+
+procedure TForm1.FDMemTable1BeforeGetRecords(DataSet: TFDDataSet);
+var
+  lFielddef: TFieldDef;
+  lNewField: TField;
+begin
+  //You can adjust field properties here.
+  FDMemTable1.FieldByName('show').Visible := False;
+
+  if rdgCreateColumnOrder.ItemIndex = 1 then
+    begin
+      //This does not work! I wish it would...
+      lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
+      lFieldDef.Name := 'NewStatus';
+      lFieldDef.DataType := ftWideString;
+      lNewField := lFieldDef.CreateField(FDMemTable1);
+      lNewField.FieldKind := fkCalculated;
+      lNewField.Calculated := True;
+      lNewField.Size := 15;
+    end;
+end;
+
+procedure TForm1.FDMemTable1CalcFields(DataSet: TDataSet);
+var
+  lNewValue: string;
+begin
+  lNewValue := IfThen(DataSet.FieldByName('show.status').AsString = 'Running', '!!!', '???');
+  DataSet.FieldByName('NewStatus').AsString := lNewValue;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);

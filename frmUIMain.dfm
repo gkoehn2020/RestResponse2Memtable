@@ -2,8 +2,8 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 347
-  ClientWidth = 677
+  ClientHeight = 300
+  ClientWidth = 919
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -14,24 +14,24 @@ object Form1: TForm1
   Position = poScreenCenter
   OnDestroy = FormDestroy
   DesignSize = (
-    677
-    347)
+    919
+    300)
   PixelsPerInch = 96
   TextHeight = 13
   object btnCreateComponents: TButton
-    Left = 135
-    Top = 33
-    Width = 185
+    Left = 8
+    Top = 143
+    Width = 204
     Height = 25
     Caption = '1) Create Restfull Components'
     TabOrder = 0
     OnClick = btnCreateComponentsClick
   end
   object DBGrid1: TDBGrid
-    Left = 8
-    Top = 64
-    Width = 661
-    Height = 275
+    Left = 218
+    Top = 33
+    Width = 693
+    Height = 259
     Anchors = [akLeft, akTop, akRight, akBottom]
     DataSource = DataSource1
     TabOrder = 1
@@ -42,9 +42,9 @@ object Form1: TForm1
     TitleFont.Style = []
   end
   object btnMakeRestRequest: TButton
-    Left = 326
-    Top = 33
-    Width = 185
+    Left = 8
+    Top = 174
+    Width = 204
     Height = 25
     Caption = '2) Make Rest Request Call'
     TabOrder = 2
@@ -53,7 +53,7 @@ object Form1: TForm1
   object LabeledEdit1: TLabeledEdit
     Left = 8
     Top = 33
-    Width = 121
+    Width = 204
     Height = 21
     EditLabel.Width = 58
     EditLabel.Height = 13
@@ -61,11 +61,24 @@ object Form1: TForm1
     TabOrder = 3
     Text = 'Trek'
   end
+  object rdgCreateColumnOrder: TRadioGroup
+    Left = 8
+    Top = 64
+    Width = 204
+    Height = 73
+    Caption = 'Options'
+    ItemIndex = 0
+    Items.Strings = (
+      'Create Calculated Column first.'
+      'Create Calculated Column in Event.')
+    TabOrder = 4
+  end
   object DataSource1: TDataSource
-    Left = 152
-    Top = 280
+    Left = 824
+    Top = 112
   end
   object FDMemTable1: TFDMemTable
+    OnCalcFields = FDMemTable1CalcFields
     FieldDefs = <
       item
         Name = 'GKStatus'
@@ -73,6 +86,7 @@ object Form1: TForm1
         Size = 20
       end>
     IndexDefs = <>
+    BeforeGetRecords = FDMemTable1BeforeGetRecords
     FetchOptions.AssignedValues = [evMode]
     FetchOptions.Mode = fmAll
     ResourceOptions.AssignedValues = [rvSilentMode]
@@ -81,7 +95,7 @@ object Form1: TForm1
     UpdateOptions.CheckRequired = False
     UpdateOptions.AutoCommitUpdates = True
     StoreDefs = True
-    Left = 152
-    Top = 200
+    Left = 824
+    Top = 32
   end
 end
