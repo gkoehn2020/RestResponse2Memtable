@@ -52,60 +52,54 @@ uses
 
 procedure TForm1.CreateDataFieldsOnDataSet;
 var
-  lFieldList: TStringList;
   lFielddef: TFieldDef;
   lNewField: TField;
 begin
-  lFieldList := TStringList.Create;
-  try
-    lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
-    lFieldDef.Name := 'show';
-    lFieldDef.DataType := ftWideString;
-    lNewField := lFieldDef.CreateField(FDMemTable1);
-    lNewField.FieldKind := fkData;
-    lNewField.Size := 15;
+  if rdgCreateColumnOrder.ItemIndex = 0 then
+    begin
+      lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
+      lFieldDef.Name := 'show';
+      lFieldDef.DataType := ftWideString;
+      lNewField := lFieldDef.CreateField(FDMemTable1);
+      lNewField.FieldKind := fkData;
+      lNewField.Size := 15;
 
-    lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
-    lFieldDef.Name := 'show.id';
-    lFieldDef.DataType := ftWideString;
-    lNewField := lFieldDef.CreateField(FDMemTable1);
-    lNewField.FieldKind := fkData;
-    lNewField.Size := 15;
+      lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
+      lFieldDef.Name := 'show.id';
+      lFieldDef.DataType := ftWideString;
+      lNewField := lFieldDef.CreateField(FDMemTable1);
+      lNewField.FieldKind := fkData;
+      lNewField.Size := 15;
 
-    lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
-    lFieldDef.Name := 'show.name';
-    lFieldDef.DataType := ftWideString;
-    lNewField := lFieldDef.CreateField(FDMemTable1);
-    lNewField.FieldKind := fkData;
-    lNewField.Size := 25;
+      lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
+      lFieldDef.Name := 'show.name';
+      lFieldDef.DataType := ftWideString;
+      lNewField := lFieldDef.CreateField(FDMemTable1);
+      lNewField.FieldKind := fkData;
+      lNewField.Size := 25;
 
-    lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
-    lFieldDef.Name := 'show.status';
-    lFieldDef.DataType := ftWideString;
-    lNewField := lFieldDef.CreateField(FDMemTable1);
-    lNewField.FieldKind := fkData;
-    lNewField.Size := 15;
+      lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
+      lFieldDef.Name := 'show.status';
+      lFieldDef.DataType := ftWideString;
+      lNewField := lFieldDef.CreateField(FDMemTable1);
+      lNewField.FieldKind := fkData;
+      lNewField.Size := 15;
 
-    lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
-    lFieldDef.Name := 'show.premiered';
-    lFieldDef.DataType := ftWideString;
-    lNewField := lFieldDef.CreateField(FDMemTable1);
-    lNewField.FieldKind := fkData;
-    lNewField.Size := 15;
+      lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
+      lFieldDef.Name := 'show.premiered';
+      lFieldDef.DataType := ftWideString;
+      lNewField := lFieldDef.CreateField(FDMemTable1);
+      lNewField.FieldKind := fkData;
+      lNewField.Size := 15;
 
-    if rdgCreateColumnOrder.ItemIndex = 0 then
-      begin
-        lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
-        lFieldDef.Name := 'NewStatus';
-        lFieldDef.DataType := ftWideString;
-        lNewField := lFieldDef.CreateField(FDMemTable1);
-        lNewField.FieldKind := fkCalculated;
-        lNewField.Calculated := True;
-        lNewField.Size := 15;
-      end;
-  finally
-    lFieldList.Free;
-  end;
+      lFieldDef := FDMemTable1.FieldDefs.AddFieldDef;
+      lFieldDef.Name := 'NewStatus';
+      lFieldDef.DataType := ftWideString;
+      lNewField := lFieldDef.CreateField(FDMemTable1);
+      lNewField.FieldKind := fkCalculated;
+      lNewField.Calculated := True;
+      lNewField.Size := 15;
+    end;
 end;
 
 procedure TForm1.btnCreateComponentsClick(Sender: TObject);
@@ -146,10 +140,8 @@ procedure TForm1.FDMemTable1BeforeGetRecords(DataSet: TFDDataSet);
 var
   lFielddef: TFieldDef;
   lNewField: TField;
+  I: Integer;
 begin
-  //You can adjust field properties here.
-  FDMemTable1.FieldByName('show').Visible := False;
-
   if rdgCreateColumnOrder.ItemIndex = 1 then
     begin
       //This does not work! I wish it would...
@@ -161,6 +153,18 @@ begin
       lNewField.Calculated := True;
       lNewField.Size := 15;
     end;
+
+  //You can adjust field properties here.
+  for I := 0 to FDMemTable1.Fields.Count-1 do
+    begin
+      FDMemTable1.Fields[i].DisplayWidth := 15;
+      FDMemTable1.Fields[i].Visible := False;
+    end;
+  FDMemTable1.FieldByName('show.id').Visible := True;
+  FDMemTable1.FieldByName('show.name').Visible := True;
+  FDMemTable1.FieldByName('show.status').Visible := True;
+  FDMemTable1.FieldByName('show.premiered').Visible := True;
+  FDMemTable1.FieldByName('NewStatus').Visible := True;
 end;
 
 procedure TForm1.FDMemTable1CalcFields(DataSet: TDataSet);
